@@ -23,14 +23,15 @@ const KwangjuMap = ({ onSpotClick, showLiterature = true, showUser = true, liter
       if (focusSpotId) {
         const spot = spotsToShow.find(s => s.id === focusSpotId);
         if (spot) {
-          // 해당 위치로 이동하고 줌인
+          // 모든 장소를 동일하게 처리 - 간단하게!
           map.setView(spot.position, 16, {
             animate: true,
             duration: 1.0
           });
         }
       }
-    }, [map]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [focusSpotId, map]);
     
     return null;
   };
@@ -38,10 +39,10 @@ const KwangjuMap = ({ onSpotClick, showLiterature = true, showUser = true, liter
   // 광주광역시 중심 좌표
   const kwangjuCenter = [35.1595, 126.8526];
   
-  // 광주광역시 경계 (더 타이트하게 조정)
+  // 광주광역시 경계 - 망월동까지 포함하도록 충분히 확장
   const kwangjuBounds = [
-    [35.0800, 126.7800], // 남서쪽 모서리 (더 가깝게)
-    [35.2400, 126.9400]  // 북동쪽 모서리 (더 가깝게)
+    [35.0600, 126.7600], // 남서쪽 모서리 (더 넓게)
+    [35.2300, 126.9600]  // 북동쪽 모서리 (망월동 35.2041, 126.9421을 충분히 포함)
   ];
 
   // props에서 받은 데이터가 있으면 사용, 없으면 기본 데이터 사용

@@ -50,10 +50,26 @@ const MapSidebar = ({
     }));
   };
 
-  // 장소 클릭 핸들러
+  // 장소 클릭 핸들러 - 지도 포커싱만 담당
   const handleSpotClick = (spotId) => {
+    console.log(`사이드바에서 장소 ${spotId} 클릭 - 지도 포커싱만 실행`);
     if (onSpotClick) {
       onSpotClick(spotId);
+    }
+  };
+
+  // 필터 토글 핸들러 개선 - 불필요한 상태 변경 방지
+  const handleToggleLiterature = () => {
+    console.log('문학 기행 필터 토글:', !showLiterature);
+    if (onToggleLiterature) {
+      onToggleLiterature();
+    }
+  };
+
+  const handleToggleUser = () => {
+    console.log('사용자 기여 필터 토글:', !showUser);
+    if (onToggleUser) {
+      onToggleUser();
     }
   };
 
@@ -75,7 +91,7 @@ const MapSidebar = ({
               <span className="font-medium text-gray-700">문학 기행</span>
             </div>
             <button
-              onClick={onToggleLiterature}
+              onClick={handleToggleLiterature}
               className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${
                 showLiterature 
                   ? 'bg-orange-500 text-white hover:bg-orange-600' 
@@ -162,7 +178,7 @@ const MapSidebar = ({
               <span className="font-medium text-gray-700">사용자 기여</span>
             </div>
             <button
-              onClick={onToggleUser}
+              onClick={handleToggleUser}
               className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${
                 showUser 
                   ? 'bg-orange-500 text-white hover:bg-orange-600' 

@@ -1,6 +1,6 @@
 // src/components/SimpleFileUpload.jsx
 import React, { useState, useRef } from 'react';
-import { Upload, X, Image, Loader } from 'lucide-react';
+import { X, Image, Loader } from 'lucide-react';
 import { uploadImageToImgBB, formatFileSize } from '../utils/imgbbUpload';
 
 const SimpleFileUpload = ({ 

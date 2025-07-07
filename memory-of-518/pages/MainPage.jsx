@@ -12,6 +12,7 @@ const MainPage = ({ user, userProfile, setUserProfile, onSpotClick, onGoToStart,
   const [showLiterature, setShowLiterature] = useState(true);
   const [showUser, setShowUser] = useState(true);
   const [focusSpotId, setFocusSpotId] = useState(null);
+  const [resetMapView, setResetMapView] = useState(false);
 
   // 사용자 진행 상황을 반영한 문학 기행 장소 데이터
   const getLiteratureSpots = () => {
@@ -26,6 +27,7 @@ const MainPage = ({ user, userProfile, setUserProfile, onSpotClick, onGoToStart,
   const handleSidebarSpotClick = (spotId) => {
     console.log(`사이드바에서 장소 ${spotId} 클릭됨!`);
     setFocusSpotId(spotId);
+    setResetMapView(false); // 특정 장소 포커싱 시 리셋 해제
   };
 
   // 임시 사용자 데이터 (나중에 Firebase에서 가져올 예정)
@@ -81,6 +83,17 @@ const MainPage = ({ user, userProfile, setUserProfile, onSpotClick, onGoToStart,
       }
     } else {
       setCurrentPage(pageId);
+      
+      // Map 페이지로 돌아올 때 지도를 전체 뷰로 리셋
+      if (pageId === 'map') {
+        setResetMapView(true);
+        setFocusSpotId(null);
+        
+        // 리셋 상태를 잠시 후 해제 (한 번만 실행되도록)
+        setTimeout(() => {
+          setResetMapView(false);
+        }, 1500);
+      }
     }
   };
 
@@ -136,6 +149,7 @@ const MainPage = ({ user, userProfile, setUserProfile, onSpotClick, onGoToStart,
                       literatureSpots={getLiteratureSpots()}
                       userSpots={userSpots}
                       focusSpotId={focusSpotId}
+                      resetMapView={resetMapView}
                     />
                   </div>
                 </div>

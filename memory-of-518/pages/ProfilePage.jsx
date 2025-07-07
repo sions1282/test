@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { signOut } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
-import { User, LogOut, Edit3, Save, X } from 'lucide-react';
+import { User, LogOut, Edit3, Save, X, RotateCcw, AlertTriangle } from 'lucide-react';
 
 const ProfilePage = ({ user, userProfile, setUserProfile }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedNickname, setEditedNickname] = useState(userProfile?.nickname || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -55,6 +57,42 @@ const ProfilePage = ({ user, userProfile, setUserProfile }) => {
     setEditedNickname(userProfile?.nickname || '');
     setIsEditing(false);
     setError('');
+  };
+
+  // 문학 기행 진행상황 초기화
+  const handleResetProgress = async () => {
+    setResetLoading(true);
+    setError('');
+
+    try {
+      // Firestore에서 진행상황 초기화
+      await updateDoc(doc(db, 'users', user.uid), {
+        'literatureProgress.completedSpots': [],
+        'literatureProgress.stamps': [],
+        'literatureProgress.lastVisited': null,
+        updatedAt: new Date()
+      });
+
+      // 로컬 상태 업데이트
+      setUserProfile({
+        ...userProfile,
+        literatureProgress: {
+          ...userProfile.literatureProgress,
+          completedSpots: [],
+          stamps: [],
+          lastVisited: null
+        }
+      });
+
+      setShowResetConfirm(false);
+      alert('문학 기행 진행상황이 초기화되었습니다.');
+      console.log('진행상황 초기화 완료');
+    } catch (error) {
+      console.error('진행상황 초기화 오류:', error);
+      setError('초기화 중 오류가 발생했습니다.');
+    } finally {
+      setResetLoading(false);
+    }
   };
 
   // 문학 기행 진행률 계산
@@ -158,10 +196,19 @@ const ProfilePage = ({ user, userProfile, setUserProfile }) => {
           {/* 로그아웃 버튼 */}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
+            className="w-full flex items-center justify-center px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium mb-4"
           >
             <LogOut size={20} className="mr-2" />
             로그아웃
+          </button>
+
+          {/* 진행상황 초기화 버튼 */}
+          <button
+            onClick={() => setShowResetConfirm(true)}
+            className="w-full flex items-center justify-center px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"
+          >
+            <RotateCcw size={20} className="mr-2" />
+            문학 기행 진행상황 초기화
           </button>
         </div>
 
@@ -228,6 +275,61 @@ const ProfilePage = ({ user, userProfile, setUserProfile }) => {
           </div>
         </div>
       </div>
+
+      {/* 진행상황 초기화 확인 모달 */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mb-4">
+                <AlertTriangle className="text-red-600" size={24} />
+              </div>
+              
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                진행상황 초기화
+              </h3>
+              
+              <p className="text-gray-600 mb-6">
+                문학 기행 진행상황을 모두 초기화하시겠습니까?<br />
+                <span className="font-medium text-red-600">완료한 모든 장소와 스탬프가 삭제되며, 이 작업은 되돌릴 수 없습니다.</span>
+              </p>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                  <p className="text-red-600 text-sm">{error}</p>
+                </div>
+              )}
+
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => {
+                    setShowResetConfirm(false);
+                    setError('');
+                  }}
+                  disabled={resetLoading}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleResetProgress}
+                  disabled={resetLoading}
+                  className="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors font-medium disabled:opacity-50 flex items-center justify-center"
+                >
+                  {resetLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      초기화 중...
+                    </>
+                  ) : (
+                    '초기화'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
